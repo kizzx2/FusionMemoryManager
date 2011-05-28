@@ -38,6 +38,7 @@
 
 #include <map>
 #include <cassert>
+#include <stdexcept>
 
 namespace FusionMemoryManager
 {
@@ -60,7 +61,7 @@ namespace FusionMemoryManager
             static void Delete(size_t n, void * obj)
             {
                 if(Begin::pos::value == n)
-                    delete reinterpret_cast<Begin::type *>(obj);
+                    delete reinterpret_cast<typename Begin::type *>(obj);
                 else
                 {
                     DeleteAsTypeN<typename boost::mpl::next<Begin>::type,
@@ -86,13 +87,13 @@ namespace FusionMemoryManager
         template <typename KeyType, typename OwnerType>
         void Mark(const KeyType * key, OwnerType * owner)
         {
-            typedef boost::mpl::find<TypeVector, OwnerType>::type TypeEntry;
+            typedef typename boost::mpl::find<TypeVector, OwnerType>::type TypeEntry;
 
             assert(entries.find(reinterpret_cast<const void *>(key)) == entries.end() &&
                 "Key already marked.");
 
             // Error: TypeVector does not contain OwnerType
-            BOOST_MPL_ASSERT_NOT((boost::is_same<TypeVector::end, TypeEntry>));
+            BOOST_MPL_ASSERT_NOT((boost::is_same<typename boost::mpl::end<TypeVector>::type, TypeEntry>));
 
             entries.insert(std::make_pair(reinterpret_cast<const void *>(key),
                 Details::FusionMemoryManagerEntry(owner,
@@ -107,7 +108,8 @@ namespace FusionMemoryManager
             assert(entry != entries.end() && "Key has not been marked."); 
 
             Details::DeleteAsTypeN<
-                TypeVector::begin, TypeVector::end
+                typename boost::mpl::begin<TypeVector>::type,
+                typename boost::mpl::end<TypeVector>::type
                 >::Delete(entry->second.ownerTypeId,
                 entry->second.owner);
 
