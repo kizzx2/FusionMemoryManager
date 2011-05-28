@@ -14,7 +14,7 @@ You want to create a C run-time shared library (DLL or SO), but you want to writ
         return result->c_str();
     }
 
-The common idiom for a C library is that you will provide a `Free()` function:
+Apparently there is a "memory leak" above. The common idiom for a C library is that you will provide a `Free()` function for your caller:
 
     void Free(void * obj)
     {
@@ -23,7 +23,7 @@ The common idiom for a C library is that you will provide a `Free()` function:
 
 ### The Problem
 
-Your caller is going to give you back a `const char *`, and you can't delete that. What you want is to delete the actual `std::string` that contains the string.
+Your caller is going to give you back a `const char *`, and you can't delete that. What you want is to delete the actual `std::string`.
 
 ### The Solution -- FusionMemoryManager to the Rescue
 
@@ -41,6 +41,7 @@ Your caller is going to give you back a `const char *`, and you can't delete tha
 
     void Free(void * obj)
     {
+        // If caller gives us the const char *
         // This will delete the containing std::string
         // Calling the destructor as appropriate
         fusionManager.Free(obj);

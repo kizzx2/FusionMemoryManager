@@ -110,6 +110,9 @@ namespace FusionMemoryManager
                 TypeVector::begin, TypeVector::end
                 >::Delete(entry->second.ownerTypeId,
                 entry->second.owner);
+
+            entries.erase(reinterpret_cast<const void *>(key));
+
         }
 
     private:
