@@ -35,6 +35,7 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/find.hpp>
 #include <boost/mpl/assert.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <map>
 #include <cassert>
@@ -81,7 +82,7 @@ namespace FusionMemoryManager
     }
 
     template <class TypeVector>
-    class Manager
+    class Manager : boost::noncopyable
     {
     public:
         template <typename KeyType, typename OwnerType>
@@ -115,6 +116,11 @@ namespace FusionMemoryManager
 
             entries.erase(reinterpret_cast<const void *>(key));
 
+        }
+
+        ~Manager()
+        {
+            assert(entries.empty() && "Leaks detected");
         }
 
     private:
